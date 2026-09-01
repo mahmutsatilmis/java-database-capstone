@@ -81,7 +81,7 @@ async function adminAddDoctor() {
     email,
     password,
     phone,
-    availability,
+    availableTimes: availability,
   };
 
   try {
