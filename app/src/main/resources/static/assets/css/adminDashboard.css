@@ -1,94 +1,189 @@
-/*this is the style sheet for the adminDashboard. */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
 
-/* 
-Global Reset (`*`)
+html, body {
+    height: 100%;
+    font-family: Arial, sans-serif;
+}
 
-* Purpose: Ensure consistent layout across all browsers.
-* Properties:
+body {
+    background: #f4f7f7;
+}
 
-  * `margin: 0` — removes default outer spacing from all elements.
-  * `padding: 0` — removes default inner spacing.
-  * `box-sizing: border-box` — ensures padding and borders are included within the total width/height of elements.
+.container {
+    width: 100%;
+    min-height: 100vh;
+}
 
-Base HTML & Body (`html, body`)
+.wrapper {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
 
-* Purpose: Establish a full-height layout and apply a standard font across the page.
-* Properties:
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 40px 20px;
+    background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),
+        url('https://images.unsplash.com/photo-1576091160550-2173dba999ef?auto=format&fit=crop&w=1400&q=80');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
 
-  * `height: 100%` — allows containers to stretch to the full viewport height.
-  * `font-family: Arial, sans-serif` — applies a clean, readable sans-serif font.
+.dashboard-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: min(900px, 100%);
+    margin: 0 auto 24px;
+}
 
-Main Layout Wrapper (`.wrapper`)
+#searchBar,
+.filter-select,
+.modal input,
+.modal select {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid #d8e6e6;
+    border-radius: 10px;
+    font-size: 15px;
+    outline: none;
+}
 
-* Purpose: Create a flexible, vertical layout that fills the entire screen.
-* Properties:
+#searchBar:focus,
+.filter-select:focus,
+.modal input:focus,
+.modal select:focus {
+    border-color: #015c5d;
+    box-shadow: 0 0 0 3px rgba(1, 92, 93, 0.12);
+}
 
-  * `display: flex` — enables flexbox for layout control.
-  * `flex-direction: column` — stacks children vertically.
-  * `min-height: 100vh` — ensures the wrapper always covers full screen height.
+.filter-row {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+}
 
-Section Heading (`h2`)
+.filter-select {
+    flex: 1;
+}
 
-* Purpose: Style the headings prominently for section separation.
-* Properties:
+#content {
+    width: min(900px, 100%);
+    margin: 0 auto;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: center;
+}
 
-  * `font-size: 32px` — makes the heading large and noticeable.
-  * `font-weight: bold` — emphasizes text.
-  * `margin-bottom: 50px` — creates space below the heading.
-  * `color: #003e3e` — uses a strong teal for visual anchoring.
+.doctor-card {
+    display: flex;
+    flex-direction: column;
+    width: min(260px, 100%);
+    background: rgba(255, 255, 255, 0.92);
+    border-radius: 14px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+}
 
-Main Content Section (`.main-content`)
+.doctor-card-header {
+    background: #015c5d;
+    color: #fff;
+    padding: 16px;
+    font-size: 1.1rem;
+    font-weight: 700;
+}
 
-* Purpose: Layout the main content with padding and a background image.
-* Properties:
+.doctor-card-body {
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: #333;
+}
 
-  * `flex-grow: 1` — lets the content fill the available vertical space.
-  * `padding: 40px` — adds internal spacing around content.
-  * `display: flex` and `flex-direction: column` — organizes content in a vertical stack.
-  * `text-align: center` — centers the text.
-  * `background-image: url("index.png")` — sets a full-screen dashboard background.
-  * `background-size: cover` — ensures the image covers the whole section.
-  * `background-position: center` — centers the image.
-  * `background-repeat: no-repeat` — avoids tiling the image.
-  * `background-attachment: fixed` — fixes the image while scrolling.
+.doctor-card-body p {
+    margin: 0;
+}
 
-Primary Button (`button`)
+.adminBtn,
+button {
+    background-color: #a62b1f;
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 20px;
+    margin-top: 20px;
+    width: 200px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: opacity 0.2s ease, transform 0.2s ease;
+}
 
-* Purpose: Design prominent, interactive buttons for main actions.
+.adminBtn {
+    background-color: #f4f4f4;
+    color: #333;
+    width: 110px;
+    padding: 10px 0;
+    font-weight: 700;
+}
 
-* Properties:
+button:hover,
+.adminBtn:hover {
+    opacity: 0.95;
+    transform: translateY(-1px);
+}
 
-  * `background-color: #A62B1F` — sets a bold red color.
-  * `color: white` — makes text stand out.
-  * `border: none` — removes any outline/border.
-  * `border-radius: 12px` — creates rounded corners.
-  * `padding: 10px 20px` — gives space inside the button.
-  * `margin-top: 20px` — adds spacing above the button.
-  * `width: 200px` — ensures consistent button width.
-  * `cursor: pointer` — shows a hand icon on hover.
-  * `font-size: 16px` — makes the text readable.
+.modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+}
 
-* On Hover:
+.modal.active {
+    display: flex;
+}
 
-  * Retains the same red background to maintain branding.
+.modal-content {
+    background: #fff;
+    width: min(500px, 90%);
+    border-radius: 12px;
+    padding: 24px;
+    position: relative;
+}
 
-Admin Button (`.adminBtn`)
+.close {
+    position: absolute;
+    top: 12px;
+    right: 16px;
+    font-size: 30px;
+    cursor: pointer;
+    color: #003e3e;
+}
 
-* Purpose: Provide a secondary button style for admin-specific actions.
+@media (max-width: 768px) {
+    .filter-row {
+        flex-direction: column;
+    }
 
-* Properties:
+    #content {
+        flex-direction: column;
+        align-items: center;
+    }
 
-  * `background-color: #f4f4f4` — uses a light grey background.
-  * `color: #333` — uses dark text for contrast.
-  * `font-weight: bold` — emphasizes text.
-  * `width: 110px` — smaller, compact width.
-  * `padding: 10px 0` — vertical padding only.
-  * `border: none` — clean look.
-  * `cursor: pointer` — indicates it's clickable.
-
-* On Hover**:
-
-   Changes text color to `#A62B1F` for brand consistency while keeping the background same.
-
-
-*/
+    .doctor-card {
+        width: min(100%, 320px);
+    }
+}
