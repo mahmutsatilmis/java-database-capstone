@@ -18,8 +18,10 @@ import com.project.back_end.models.Patient;
 import com.project.back_end.services.PatientService;
 import com.project.back_end.services.Service;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("/patient")
+@RequestMapping("${api.path}patient")
 public class PatientController {
 
     private final PatientService patientService;
@@ -42,7 +44,7 @@ public class PatientController {
     }
 
     @PostMapping
-    public ResponseEntity<Map<String, String>> createPatient(@RequestBody Patient patient) {
+    public ResponseEntity<Map<String, String>> createPatient(@Valid @RequestBody Patient patient) {
         if (!service.validatePatient(patient)) {
             Map<String, String> response = new HashMap<>();
             response.put("message", "Patient with email id or phone no already exist");
@@ -89,8 +91,9 @@ public class PatientController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(errorResponse);
         }
 
-        return service.filterPatient(condition, name, token);
+        String sanitizedCondition = (condition == null || condition.equalsIgnoreCase("null") || condition.equalsIgnoreCase("all") || condition.equalsIgnoreCase("allAppointments")) ? null : condition;
+        String sanitizedName = (name == null || name.equalsIgnoreCase("null") || name.equalsIgnoreCase("all")) ? null : name;
+
+        return service.filterPatient(sanitizedCondition, sanitizedName, token);
     }
 }
-
-

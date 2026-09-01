@@ -1,6 +1,7 @@
 // modals.js
 export function openModal(type) {
   let modalContent = '';
+
   if (type === 'addDoctor') {
     modalContent = `
       <div class="modal-card">
@@ -13,20 +14,20 @@ export function openModal(type) {
           <label>Specialization</label>
           <select id="specialization" class="input-field select-dropdown">
             <option value="">Select specialization</option>
-            <option value="cardiologist">Cardiologist</option>
-            <option value="dermatologist">Dermatologist</option>
-            <option value="neurologist">Neurologist</option>
-            <option value="pediatrician">Pediatrician</option>
-            <option value="orthopedic">Orthopedic</option>
-            <option value="gynecologist">Gynecologist</option>
-            <option value="psychiatrist">Psychiatrist</option>
-            <option value="dentist">Dentist</option>
-            <option value="ophthalmologist">Ophthalmologist</option>
-            <option value="ent">ENT Specialist</option>
-            <option value="urologist">Urologist</option>
-            <option value="oncologist">Oncologist</option>
-            <option value="gastroenterologist">Gastroenterologist</option>
-            <option value="general">General Physician</option>
+            <option value="Cardiologist">Cardiologist</option>
+            <option value="Dermatologist">Dermatologist</option>
+            <option value="Neurologist">Neurologist</option>
+            <option value="Pediatrician">Pediatrician</option>
+            <option value="Orthopedic">Orthopedic</option>
+            <option value="Gynecologist">Gynecologist</option>
+            <option value="Psychiatrist">Psychiatrist</option>
+            <option value="Dentist">Dentist</option>
+            <option value="Ophthalmologist">Ophthalmologist</option>
+            <option value="ENT Specialist">ENT Specialist</option>
+            <option value="Urologist">Urologist</option>
+            <option value="Oncologist">Oncologist</option>
+            <option value="Gastroenterologist">Gastroenterologist</option>
+            <option value="General Physician">General Physician</option>
           </select>
         </div>
         <div class="field-group">
@@ -53,65 +54,93 @@ export function openModal(type) {
         <button class="dashboard-btn primary-btn" id="saveDoctorBtn">Save Doctor</button>
       </div>
     `;
-  } else if (type === 'patientLogin') {
-    modalContent = `
-        <h2>Patient Login</h2>
-        <input type="text" id="email" placeholder="Email" class="input-field">
-        <input type="password" id="password" placeholder="Password" class="input-field">
-        <button class="dashboard-btn" id="loginBtn">Login</button>
-      `;
-  }
-  else if (type === "patientSignup") {
-    modalContent = `
-      <h2>Patient Signup</h2>
-      <input type="text" id="name" placeholder="Name" class="input-field">
-      <input type="email" id="email" placeholder="Email" class="input-field">
-      <input type="password" id="password" placeholder="Password" class="input-field">
-      <input type="text" id="phone" placeholder="Phone" class="input-field">
-      <input type="text" id="address" placeholder="Address" class="input-field">
-      <button class="dashboard-btn" id="signupBtn">Signup</button>
-    `;
-
   } else if (type === 'adminLogin') {
     modalContent = `
-        <h2>Admin Login</h2>
-        <input type="text" id="username" name="username" placeholder="Username" class="input-field">
-        <input type="password" id="password" name="password" placeholder="Password" class="input-field">
-        <button class="dashboard-btn" id="adminLoginBtn" >Login</button>
-      `;
+      <div class="modal-card" style="width: 100%; max-width: 400px; padding: 24px; display: flex; flex-direction: column; align-items: center;">
+        <h2 style="margin-bottom: 20px; text-align: center; color: #013b3d;">Admin Login</h2>
+        <input type="text" id="username" name="username" placeholder="Username" class="input-field" style="width: 100%; margin-bottom: 15px;">
+        <input type="password" id="password" name="password" placeholder="Password" class="input-field" style="width: 100%; margin-bottom: 20px;">
+        <button class="dashboard-btn" id="adminLoginBtn" style="width: 100%; margin-top: 0;">Login</button>
+      </div>
+    `;
   } else if (type === 'doctorLogin') {
     modalContent = `
-        <h2>Doctor Login</h2>
-        <input type="text" id="email" placeholder="Email" class="input-field">
-        <input type="password" id="password" placeholder="Password" class="input-field">
-        <button class="dashboard-btn" id="doctorLoginBtn" >Login</button>
-      `;
+      <div class="modal-card" style="width: 100%; max-width: 400px; padding: 24px; display: flex; flex-direction: column; align-items: center;">
+        <h2 style="margin-bottom: 20px; text-align: center; color: #013b3d;">Doctor Login</h2>
+        <input type="text" id="email" placeholder="Email" class="input-field" style="width: 100%; margin-bottom: 15px;">
+        <input type="password" id="password" placeholder="Password" class="input-field" style="width: 100%; margin-bottom: 20px;">
+        <button class="dashboard-btn" id="doctorLoginBtn" style="width: 100%; margin-top: 0;">Login</button>
+      </div>
+    `;
+  } else if (type === 'patientLogin') {
+    modalContent = `
+      <div class="modal-card" style="width: 100%; max-width: 400px; padding: 24px; display: flex; flex-direction: column; align-items: center;">
+        <h2 style="margin-bottom: 20px; text-align: center; color: #013b3d;">Patient Login</h2>
+        <input type="text" id="email" placeholder="Email" class="input-field" style="width: 100%; margin-bottom: 15px;">
+        <input type="password" id="password" placeholder="Password" class="input-field" style="width: 100%; margin-bottom: 20px;">
+        <button class="dashboard-btn" id="loginBtn" style="width: 100%; margin-top: 0;">Login</button>
+      </div>
+    `;
+  } else if (type === 'patientSignup') {
+    modalContent = `
+      <div class="modal-card" style="width: 100%; max-width: 440px; padding: 24px; display: flex; flex-direction: column; align-items: center;">
+        <h2 style="margin-bottom: 20px; text-align: center; color: #013b3d;">Patient Signup</h2>
+        <input type="text" id="name" placeholder="Name" class="input-field" style="width: 100%; margin-bottom: 12px;">
+        <input type="email" id="email" placeholder="Email" class="input-field" style="width: 100%; margin-bottom: 12px;">
+        <input type="password" id="password" placeholder="Password" class="input-field" style="width: 100%; margin-bottom: 12px;">
+        <input type="text" id="phone" placeholder="Phone (10 digits)" class="input-field" style="width: 100%; margin-bottom: 12px;">
+        <input type="text" id="address" placeholder="Address" class="input-field" style="width: 100%; margin-bottom: 20px;">
+        <button class="dashboard-btn" id="signupBtn" style="width: 100%; margin-top: 0;">Signup</button>
+      </div>
+    `;
   }
 
-  document.getElementById('modal-body').innerHTML = modalContent;
-  document.getElementById('modal').style.display = 'block';
+  const modal = document.getElementById('modal');
+  const modalBody = document.getElementById('modal-body');
+  if (!modal || !modalBody) return;
 
-  document.getElementById('closeModal').onclick = () => {
-    document.getElementById('modal').style.display = 'none';
-  };
+  modalBody.innerHTML = modalContent;
+  modal.classList.add('active');
 
-  if (type === "patientSignup") {
-    document.getElementById("signupBtn").addEventListener("click", signupPatient);
-  }
-
-  if (type === "patientLogin") {
-    document.getElementById("loginBtn").addEventListener("click", loginPatient);
+  const closeBtn = document.getElementById('closeModal');
+  if (closeBtn) {
+    closeBtn.onclick = () => {
+      modal.classList.remove('active');
+    };
   }
 
   if (type === 'addDoctor') {
-    document.getElementById('saveDoctorBtn').addEventListener('click', adminAddDoctor);
+    const saveBtn = document.getElementById('saveDoctorBtn');
+    if (saveBtn && typeof window.adminAddDoctor === 'function') {
+      saveBtn.addEventListener('click', window.adminAddDoctor);
+    }
   }
 
   if (type === 'adminLogin') {
-    document.getElementById('adminLoginBtn').addEventListener('click', adminLoginHandler);
+    const btn = document.getElementById('adminLoginBtn');
+    if (btn && typeof window.adminLoginHandler === 'function') {
+      btn.addEventListener('click', window.adminLoginHandler);
+    }
   }
 
   if (type === 'doctorLogin') {
-    document.getElementById('doctorLoginBtn').addEventListener('click', doctorLoginHandler);
+    const btn = document.getElementById('doctorLoginBtn');
+    if (btn && typeof window.doctorLoginHandler === 'function') {
+      btn.addEventListener('click', window.doctorLoginHandler);
+    }
+  }
+
+  if (type === 'patientLogin') {
+    const btn = document.getElementById('loginBtn');
+    if (btn && typeof window.loginPatient === 'function') {
+      btn.addEventListener('click', window.loginPatient);
+    }
+  }
+
+  if (type === 'patientSignup') {
+    const btn = document.getElementById('signupBtn');
+    if (btn && typeof window.signupPatient === 'function') {
+      btn.addEventListener('click', window.signupPatient);
+    }
   }
 }

@@ -70,7 +70,8 @@ async function doctorLoginHandler() {
     return;
   }
 
-  const doctor = { email, password };
+  // 'email' yerine 'identifier' olarak gönderilir
+  const doctor = { identifier: email, password };
 
   try {
     const response = await fetch(DOCTOR_API, {
@@ -84,7 +85,7 @@ async function doctorLoginHandler() {
     const data = await response.json();
 
     if (!response.ok) {
-      alert("Invalid credentials!");
+      alert(data.message || "Invalid credentials!");
       return;
     }
 

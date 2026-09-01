@@ -22,6 +22,8 @@ import com.project.back_end.models.Doctor;
 import com.project.back_end.services.DoctorService;
 import com.project.back_end.services.Service;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("${api.path}doctor")
 public class DoctorController {
@@ -65,7 +67,7 @@ public class DoctorController {
     }
 
     @PostMapping("/{token}")
-    public ResponseEntity<Map<String, String>> saveDoctor(@RequestBody Doctor doctor,
+    public ResponseEntity<Map<String, String>> saveDoctor(@Valid @RequestBody Doctor doctor,
                                                          @PathVariable String token) {
         Map<String, Object> validation = service.validateToken(token, "admin");
         if (validation.containsKey("error")) {
@@ -95,7 +97,7 @@ public class DoctorController {
     }
 
     @PutMapping("/{token}")
-    public ResponseEntity<Map<String, String>> updateDoctor(@RequestBody Doctor doctor,
+    public ResponseEntity<Map<String, String>> updateDoctor(@Valid @RequestBody Doctor doctor,
                                                             @PathVariable String token) {
         Map<String, Object> validation = service.validateToken(token, "admin");
         if (validation.containsKey("error")) {
@@ -149,12 +151,5 @@ public class DoctorController {
                                                                     @RequestParam(required = false) String time,
                                                                     @RequestParam(required = false) String specialty) {
         return ResponseEntity.ok(service.filterDoctor(name, specialty, time));
-    }
-
-    @GetMapping("/filter/{name}/{time}/{speciality}")
-    public ResponseEntity<Map<String, Object>> filterDoctors(@PathVariable(required = false) String name,
-                                                            @PathVariable(required = false) String time,
-                                                            @PathVariable(required = false) String speciality) {
-        return ResponseEntity.ok(service.filterDoctor(name, speciality, time));
     }
 }

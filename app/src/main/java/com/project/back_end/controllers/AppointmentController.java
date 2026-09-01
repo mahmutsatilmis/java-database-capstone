@@ -20,8 +20,10 @@ import com.project.back_end.models.Appointment;
 import com.project.back_end.services.AppointmentService;
 import com.project.back_end.services.Service;
 
+import jakarta.validation.Valid;
+
 @RestController
-@RequestMapping("/appointments")
+@RequestMapping("${api.path}appointments")
 public class AppointmentController {
 
     private final AppointmentService appointmentService;
@@ -44,7 +46,8 @@ public class AppointmentController {
 
         try {
             LocalDate appointmentDate = LocalDate.parse(date);
-            return ResponseEntity.ok(appointmentService.getAppointment(patientName, appointmentDate, token));
+            String searchName = (patientName == null || patientName.equalsIgnoreCase("null") || patientName.isBlank()) ? null : patientName;
+            return ResponseEntity.ok(appointmentService.getAppointment(searchName, appointmentDate, token));
         } catch (Exception e) {
             Map<String, Object> error = new HashMap<>();
             error.put("error", "Invalid date format.");
@@ -53,7 +56,7 @@ public class AppointmentController {
     }
 
     @PostMapping("/{token}")
-    public ResponseEntity<Map<String, String>> bookAppointment(@RequestBody Appointment appointment,
+    public ResponseEntity<Map<String, String>> bookAppointment(@Valid @RequestBody Appointment appointment,
                                                               @PathVariable String token) {
         Map<String, Object> validation = service.validateToken(token, "patient");
         if (validation.containsKey("error")) {
@@ -81,7 +84,7 @@ public class AppointmentController {
     }
 
     @PutMapping("/{token}")
-    public ResponseEntity<Map<String, String>> updateAppointment(@RequestBody Appointment appointment,
+    public ResponseEntity<Map<String, String>> updateAppointment(@Valid @RequestBody Appointment appointment,
                                                                 @PathVariable String token) {
         Map<String, Object> validation = service.validateToken(token, "patient");
         if (validation.containsKey("error")) {

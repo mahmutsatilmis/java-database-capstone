@@ -6,6 +6,7 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.project.back_end.DTO.Login;
 import com.project.back_end.models.Admin;
@@ -25,6 +26,7 @@ public class Service {
     private final TokenService tokenService;
     private final DoctorService doctorService;
     private final PatientService patientService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public Service(AdminRepository adminRepository,
@@ -32,13 +34,15 @@ public class Service {
                    PatientRepository patientRepository,
                    TokenService tokenService,
                    DoctorService doctorService,
-                   PatientService patientService) {
+                   PatientService patientService,
+                   PasswordEncoder passwordEncoder) {
         this.adminRepository = adminRepository;
         this.doctorRepository = doctorRepository;
         this.patientRepository = patientRepository;
         this.tokenService = tokenService;
         this.doctorService = doctorService;
         this.patientService = patientService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Map<String, Object> validateToken(String token, String role) {
@@ -68,7 +72,12 @@ public class Service {
 
         try {
             Admin admin = adminRepository.findByUsername(receivedAdmin.getUsername());
-            if (admin == null || !admin.getPassword().equals(receivedAdmin.getPassword())) {
+            boolean matches = admin != null && (
+                admin.getPassword().equals(receivedAdmin.getPassword()) ||
+                passwordEncoder.matches(receivedAdmin.getPassword(), admin.getPassword())
+            );
+
+            if (!matches) {
                 response.put("message", "Invalid username or password.");
                 return ResponseEntity.status(401).body(response);
             }
@@ -156,7 +165,7 @@ public class Service {
 
         try {
             Patient patient = patientRepository.findByEmail(login.getIdentifier());
-            if (patient == null || !patient.getPassword().equals(login.getPassword())) {
+            if (patient == null || !passwordEncoder.matches(login.getPassword(), patient.getPassword())) {
                 response.put("message", "Invalid email or password.");
                 return ResponseEntity.status(401).body(response);
             }

@@ -6,11 +6,13 @@ import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.project.back_end.DTO.AppointmentDTO;
 import com.project.back_end.models.Appointment;
+import com.project.back_end.models.Doctor;
 import com.project.back_end.models.Patient;
 import com.project.back_end.repo.AppointmentRepository;
 import com.project.back_end.repo.PatientRepository;
@@ -21,20 +23,26 @@ public class PatientService {
     private final PatientRepository patientRepository;
     private final AppointmentRepository appointmentRepository;
     private final TokenService tokenService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public PatientService(PatientRepository patientRepository,
                           AppointmentRepository appointmentRepository,
-                          TokenService tokenService) {
+                          TokenService tokenService,
+                          PasswordEncoder passwordEncoder) {
         this.patientRepository = patientRepository;
         this.appointmentRepository = appointmentRepository;
         this.tokenService = tokenService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public int createPatient(Patient patient) {
         try {
             if (patient == null) {
                 return 0;
+            }
+            if (patient.getPassword() != null && !patient.getPassword().isBlank()) {
+                patient.setPassword(passwordEncoder.encode(patient.getPassword()));
             }
             patientRepository.save(patient);
             return 1;
@@ -191,7 +199,7 @@ public class PatientService {
         }
 
         Patient patient = appointment.getPatient();
-        com.project.back_end.models.Doctor doctor = appointment.getDoctor();
+        Doctor doctor = appointment.getDoctor();
 
         return new AppointmentDTO(
                 appointment.getId(),

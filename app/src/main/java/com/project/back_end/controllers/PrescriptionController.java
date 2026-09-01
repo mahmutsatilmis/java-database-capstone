@@ -17,6 +17,8 @@ import com.project.back_end.models.Prescription;
 import com.project.back_end.services.PrescriptionService;
 import com.project.back_end.services.Service;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("${api.path}prescription")
 public class PrescriptionController {
@@ -31,7 +33,7 @@ public class PrescriptionController {
     }
 
     @PostMapping("/{token}")
-    public ResponseEntity<Map<String, String>> savePrescription(@RequestBody Prescription prescription,
+    public ResponseEntity<Map<String, String>> savePrescription(@Valid @RequestBody Prescription prescription,
                                                               @PathVariable String token) {
         Map<String, Object> validation = service.validateToken(token, "doctor");
         if (validation.containsKey("error")) {

@@ -111,6 +111,8 @@ body {
 .modal-card {
     background: #fff;
     width: min(520px, 92vw);
+    max-height: 85vh;
+    overflow-y: auto;
     border-radius: 18px;
     padding: 28px 24px 20px;
     box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
@@ -215,6 +217,7 @@ button:hover,
     z-index: 1000;
     align-items: center;
     justify-content: center;
+    padding: 20px;
 }
 
 .modal.active {
@@ -223,19 +226,30 @@ button:hover,
 
 .modal-content {
     background: #fff;
-    width: min(500px, 90%);
-    border-radius: 12px;
+    width: min(540px, calc(100vw - 40px));
+    max-height: 90vh;
+    overflow-y: auto;
+    border-radius: 18px;
     padding: 24px;
     position: relative;
+    box-shadow: 0 20px 45px rgba(0, 0, 0, 0.18);
+}
+
+#modal-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
 .close {
     position: absolute;
-    top: 12px;
-    right: 16px;
+    top: 18px;
+    right: 22px;
     font-size: 30px;
     cursor: pointer;
     color: #003e3e;
+    z-index: 2;
 }
 
 @media (max-width: 768px) {
@@ -251,4 +265,17 @@ button:hover,
     .doctor-card {
         width: min(100%, 320px);
     }
+}
+/* Modal kartının içindeki kaydırma çubuğunu güzelleştirmek için */
+.modal-card::-webkit-scrollbar {
+    width: 6px;
+}
+
+.modal-card::-webkit-scrollbar-thumb {
+    background-color: #015c5d80;
+    border-radius: 4px;
+}
+
+.modal-card::-webkit-scrollbar-track {
+    background: #f1f1f1;
 }

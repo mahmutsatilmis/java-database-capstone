@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,14 +31,17 @@ public class DoctorService {
     private final DoctorRepository doctorRepository;
     private final AppointmentRepository appointmentRepository;
     private final TokenService tokenService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public DoctorService(DoctorRepository doctorRepository,
                          AppointmentRepository appointmentRepository,
-                         TokenService tokenService) {
+                         TokenService tokenService,
+                         PasswordEncoder passwordEncoder) {
         this.doctorRepository = doctorRepository;
         this.appointmentRepository = appointmentRepository;
         this.tokenService = tokenService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Transactional(readOnly = true)
@@ -97,6 +101,7 @@ public class DoctorService {
                 return -1;
             }
 
+            doctor.setPassword(passwordEncoder.encode(doctor.getPassword()));
             doctorRepository.save(doctor);
             return 1;
         } catch (Exception e) {
@@ -110,8 +115,16 @@ public class DoctorService {
         }
 
         try {
-            if (!doctorRepository.existsById(doctor.getId())) {
+            Optional<Doctor> existingOptional = doctorRepository.findById(doctor.getId());
+            if (existingOptional.isEmpty()) {
                 return -1;
+            }
+
+            Doctor existing = existingOptional.get();
+            if (doctor.getPassword() != null && !doctor.getPassword().isBlank()) {
+                doctor.setPassword(passwordEncoder.encode(doctor.getPassword()));
+            } else {
+                doctor.setPassword(existing.getPassword());
             }
 
             doctorRepository.save(doctor);
@@ -151,7 +164,7 @@ public class DoctorService {
 
         try {
             Doctor doctor = doctorRepository.findByEmail(login.getIdentifier());
-            if (doctor == null || !doctor.getPassword().equals(login.getPassword())) {
+            if (doctor == null || !passwordEncoder.matches(login.getPassword(), doctor.getPassword())) {
                 response.put("message", "Invalid email or password.");
                 return ResponseEntity.status(401).body(response);
             }
@@ -179,8 +192,7 @@ public class DoctorService {
     @Transactional(readOnly = true)
     public Map<String, Object> filterDoctorsByNameSpecilityandTime(String name, String specialty, String amOrPm) {
         Map<String, Object> response = new HashMap<>();
-
-        List<Doctor> doctors = new ArrayList<>();
+        List<Doctor> doctors;
 
         if (name != null && !name.isBlank() && specialty != null && !specialty.isBlank()) {
             doctors = doctorRepository.findByNameContainingIgnoreCaseAndSpecialtyIgnoreCase(name, specialty);
@@ -196,63 +208,6 @@ public class DoctorService {
             doctors = filterDoctorByTime(doctors, amOrPm);
         }
 
-        response.put("doctors", doctors);
-        return response;
-    }
-
-    @Transactional(readOnly = true)
-    public Map<String, Object> filterDoctorByNameAndTime(String name, String amOrPm) {
-        Map<String, Object> response = new HashMap<>();
-        List<Doctor> doctors = (name == null || name.isBlank())
-                ? doctorRepository.findAll()
-                : doctorRepository.findByNameLike(name);
-        if (amOrPm != null && !amOrPm.isBlank()) {
-            doctors = filterDoctorByTime(doctors, amOrPm);
-        }
-        response.put("doctors", doctors);
-        return response;
-    }
-
-    @Transactional(readOnly = true)
-    public Map<String, Object> filterDoctorByNameAndSpecility(String name, String specilty) {
-        Map<String, Object> response = new HashMap<>();
-        List<Doctor> doctors = (name == null || name.isBlank() || specilty == null || specilty.isBlank())
-                ? doctorRepository.findAll()
-                : doctorRepository.findByNameContainingIgnoreCaseAndSpecialtyIgnoreCase(name, specilty);
-        response.put("doctors", doctors);
-        return response;
-    }
-
-    @Transactional(readOnly = true)
-    public Map<String, Object> filterDoctorByTimeAndSpecility(String specilty, String amOrPm) {
-        Map<String, Object> response = new HashMap<>();
-        List<Doctor> doctors = (specilty == null || specilty.isBlank())
-                ? doctorRepository.findAll()
-                : doctorRepository.findBySpecialtyIgnoreCase(specilty);
-        if (amOrPm != null && !amOrPm.isBlank()) {
-            doctors = filterDoctorByTime(doctors, amOrPm);
-        }
-        response.put("doctors", doctors);
-        return response;
-    }
-
-    @Transactional(readOnly = true)
-    public Map<String, Object> filterDoctorBySpecility(String specilty) {
-        Map<String, Object> response = new HashMap<>();
-        List<Doctor> doctors = (specilty == null || specilty.isBlank())
-                ? doctorRepository.findAll()
-                : doctorRepository.findBySpecialtyIgnoreCase(specilty);
-        response.put("doctors", doctors);
-        return response;
-    }
-
-    @Transactional(readOnly = true)
-    public Map<String, Object> filterDoctorsByTime(String amOrPm) {
-        Map<String, Object> response = new HashMap<>();
-        List<Doctor> doctors = doctorRepository.findAll();
-        if (amOrPm != null && !amOrPm.isBlank()) {
-            doctors = filterDoctorByTime(doctors, amOrPm);
-        }
         response.put("doctors", doctors);
         return response;
     }
