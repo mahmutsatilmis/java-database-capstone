@@ -12,8 +12,12 @@ import com.project.back_end.services.Service;
 @Controller
 public class DashboardController {
 
+    private final Service service;
+
     @Autowired
-    private Service service;
+    public DashboardController(Service service) {
+        this.service = service;
+    }
 
     @GetMapping("/adminDashboard/{token}")
     public String adminDashboard(@PathVariable String token) {
@@ -21,7 +25,7 @@ public class DashboardController {
         if (validationResult.isEmpty()) {
             return "admin/adminDashboard";
         }
-        return "redirect:http://localhost:8080";
+        return "redirect:/";
     }
 
     @GetMapping("/doctorDashboard/{token}")
@@ -30,6 +34,6 @@ public class DashboardController {
         if (validationResult.isEmpty()) {
             return "doctor/doctorDashboard";
         }
-        return "redirect:http://localhost:8080";
+        return "redirect:/";
     }
 }

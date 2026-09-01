@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.project.back_end.DTO.Login;
@@ -141,6 +142,13 @@ public class DoctorController {
 
         response.put("message", "Some internal error occurred");
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+    }
+
+    @GetMapping("/filter")
+    public ResponseEntity<Map<String, Object>> filterDoctorsByQuery(@RequestParam(required = false) String name,
+                                                                    @RequestParam(required = false) String time,
+                                                                    @RequestParam(required = false) String specialty) {
+        return ResponseEntity.ok(service.filterDoctor(name, specialty, time));
     }
 
     @GetMapping("/filter/{name}/{time}/{speciality}")
