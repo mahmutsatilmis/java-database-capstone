@@ -15,32 +15,35 @@ import com.project.back_end.models.Appointment;
 @Repository
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
-    @Query("SELECT a FROM Appointment a LEFT JOIN FETCH a.doctor d LEFT JOIN FETCH d.availableTimes WHERE d.id = :doctorId AND a.appointmentTime BETWEEN :start AND :end")
-    List<Appointment> findByDoctorIdAndAppointmentTimeBetween(@Param("doctorId") Long doctorId,
-                                                             @Param("start") LocalDateTime start,
-                                                             @Param("end") LocalDateTime end);
+    List<Appointment> findByDoctor_Id(Long doctorId);
 
-    @Query("SELECT a FROM Appointment a LEFT JOIN FETCH a.doctor d LEFT JOIN FETCH a.patient p WHERE d.id = :doctorId AND LOWER(p.name) LIKE LOWER(CONCAT('%', :patientName, '%')) AND a.appointmentTime BETWEEN :start AND :end")
-    List<Appointment> findByDoctorIdAndPatient_NameContainingIgnoreCaseAndAppointmentTimeBetween(@Param("doctorId") Long doctorId,
-                                                                                             @Param("patientName") String patientName,
-                                                                                             @Param("start") LocalDateTime start,
-                                                                                             @Param("end") LocalDateTime end);
+    List<Appointment> findByDoctor_IdOrderByAppointmentTimeAsc(Long doctorId);
 
-    @Modifying
-    @Transactional
-    @Query("DELETE FROM Appointment a WHERE a.doctor.id = :doctorId")
-    void deleteAllByDoctorId(@Param("doctorId") Long doctorId);
+    List<Appointment> findByDoctorIdAndAppointmentTimeBetween(Long doctorId, LocalDateTime start, LocalDateTime end);
+
+    @Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId AND LOWER(a.patient.name) LIKE LOWER(CONCAT('%', :patientName, '%'))")
+    List<Appointment> findByDoctorIdAndPatientName(@Param("doctorId") Long doctorId, @Param("patientName") String patientName);
+
+    @Query("SELECT a FROM Appointment a WHERE a.doctor.id = :doctorId AND a.appointmentTime BETWEEN :start AND :end AND LOWER(a.patient.name) LIKE LOWER(CONCAT('%', :patientName, '%'))")
+    List<Appointment> findByDoctorIdAndDateAndPatientName(@Param("doctorId") Long doctorId,
+                                                         @Param("start") LocalDateTime start,
+                                                         @Param("end") LocalDateTime end,
+                                                         @Param("patientName") String patientName);
 
     List<Appointment> findByPatient_Id(Long patientId);
 
     List<Appointment> findByPatient_IdAndStatusOrderByAppointmentTimeAsc(Long patientId, int status);
 
-    @Query("SELECT a FROM Appointment a LEFT JOIN FETCH a.doctor d LEFT JOIN FETCH a.patient p WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :doctorName, '%')) AND p.id = :patientId")
-    List<Appointment> filterByDoctorNameAndPatientId(@Param("doctorName") String doctorName,
-                                                    @Param("patientId") Long patientId);
+    @Query("SELECT a FROM Appointment a WHERE a.patient.id = :patientId AND LOWER(a.doctor.name) LIKE LOWER(CONCAT('%', :doctorName, '%'))")
+    List<Appointment> filterByDoctorNameAndPatientId(@Param("doctorName") String doctorName, @Param("patientId") Long patientId);
 
-    @Query("SELECT a FROM Appointment a LEFT JOIN FETCH a.doctor d LEFT JOIN FETCH a.patient p WHERE LOWER(d.name) LIKE LOWER(CONCAT('%', :doctorName, '%')) AND p.id = :patientId AND a.status = :status")
+    @Query("SELECT a FROM Appointment a WHERE a.patient.id = :patientId AND a.status = :status AND LOWER(a.doctor.name) LIKE LOWER(CONCAT('%', :doctorName, '%'))")
     List<Appointment> filterByDoctorNameAndPatientIdAndStatus(@Param("doctorName") String doctorName,
                                                              @Param("patientId") Long patientId,
                                                              @Param("status") int status);
+
+    @Modifying
+    @Transactional
+    @Query("DELETE FROM Appointment a WHERE a.doctor.id = :doctorId")
+    void deleteAllByDoctorId(@Param("doctorId") Long doctorId);
 }

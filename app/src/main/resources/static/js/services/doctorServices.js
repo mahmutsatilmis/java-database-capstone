@@ -5,44 +5,32 @@ const DOCTOR_API = `${API_BASE_URL}/doctor`;
 export async function getDoctors() {
   try {
     const response = await fetch(`${DOCTOR_API}`);
-    if (!response.ok) {
-      throw new Error("Unable to fetch doctors");
-    }
-
     const data = await response.json();
-    if (Array.isArray(data)) return data;
-    if (Array.isArray(data.doctors)) return data.doctors;
-    return [];
+    return data.doctors || [];
   } catch (error) {
     console.error("Error fetching doctors:", error);
     return [];
   }
 }
 
-export async function deleteDoctor(doctorId, token) {
+export async function filterDoctors(name, time, specialty) {
   try {
-    const response = await fetch(`${DOCTOR_API}/${doctorId}/${token}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const params = new URLSearchParams();
+    if (name && name.trim().length > 0 && name !== "null") params.append("name", name.trim());
+    if (time && time.trim().length > 0 && time !== "null") params.append("time", time.trim());
+    if (specialty && specialty.trim().length > 0 && specialty !== "null") params.append("specialty", specialty.trim());
 
-    const data = await response.json().catch(() => ({}));
+    const queryString = params.toString();
+    const url = queryString ? `${DOCTOR_API}/filter?${queryString}` : `${DOCTOR_API}`;
+
+    const response = await fetch(url);
     if (!response.ok) {
-      throw new Error(data.message || "Failed to delete doctor");
+      throw new Error("Failed to filter doctors");
     }
-
-    return {
-      success: true,
-      message: data.message || "Doctor deleted successfully.",
-    };
+    return await response.json();
   } catch (error) {
-    console.error("Error deleting doctor:", error);
-    return {
-      success: false,
-      message: error.message || "Failed to delete doctor.",
-    };
+    console.error("Error in filterDoctors:", error);
+    return { doctors: [] };
   }
 }
 
@@ -56,42 +44,42 @@ export async function saveDoctor(doctor, token) {
       body: JSON.stringify(doctor),
     });
 
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) {
-      throw new Error(data.message || "Unable to save doctor");
-    }
-
-    return {
-      success: true,
-      message: data.message || "Doctor saved successfully.",
-      doctor: data.doctor || doctor,
-    };
+    const data = await response.json();
+    return { success: response.ok, message: data.message };
   } catch (error) {
     console.error("Error saving doctor:", error);
-    return {
-      success: false,
-      message: error.message || "Unable to save doctor.",
-    };
+    return { success: false, message: error.message };
   }
 }
 
-export async function filterDoctors(name = null, time = null, specialty = null) {
+export async function updateDoctor(doctor, token) {
   try {
-    const params = new URLSearchParams();
-    if (name) params.append("name", name);
-    if (time) params.append("time", time);
-    if (specialty) params.append("specialty", specialty);
-
-    const response = await fetch(`${DOCTOR_API}/filter?${params.toString()}`);
-    if (!response.ok) {
-      return { doctors: [] };
-    }
+    const response = await fetch(`${DOCTOR_API}/${token}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(doctor),
+    });
 
     const data = await response.json();
-    return { doctors: Array.isArray(data.doctors) ? data.doctors : [] };
+    return { success: response.ok, message: data.message };
   } catch (error) {
-    console.error("Error filtering doctors:", error);
-    return { doctors: [] };
+    console.error("Error updating doctor:", error);
+    return { success: false, message: error.message };
   }
 }
 
+export async function deleteDoctor(id, token) {
+  try {
+    const response = await fetch(`${DOCTOR_API}/${id}/${token}`, {
+      method: "DELETE",
+    });
+
+    const data = await response.json();
+    return { success: response.ok, message: data.message };
+  } catch (error) {
+    console.error("Error deleting doctor:", error);
+    return { success: false, message: error.message };
+  }
+}

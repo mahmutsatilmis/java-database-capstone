@@ -95,14 +95,16 @@ public class Service {
     public Map<String, Object> filterDoctor(String name, String specialty, String time) {
         Map<String, Object> response = new HashMap<>();
 
-        if ((name == null || name.isBlank())
-                && (specialty == null || specialty.isBlank())
-                && (time == null || time.isBlank())) {
+        String cleanName = (name != null && !name.isBlank() && !name.equalsIgnoreCase("null")) ? name.trim() : null;
+        String cleanSpecialty = (specialty != null && !specialty.isBlank() && !specialty.equalsIgnoreCase("null")) ? specialty.trim() : null;
+        String cleanTime = (time != null && !time.isBlank() && !time.equalsIgnoreCase("null")) ? time.trim() : null;
+
+        if (cleanName == null && cleanSpecialty == null && cleanTime == null) {
             response.put("doctors", doctorService.getDoctors());
             return response;
         }
 
-        response.putAll(doctorService.filterDoctorsByNameSpecilityandTime(name, specialty, time));
+        response.putAll(doctorService.filterDoctorsByNameSpecilityandTime(cleanName, cleanSpecialty, cleanTime));
         return response;
     }
 
@@ -165,7 +167,12 @@ public class Service {
 
         try {
             Patient patient = patientRepository.findByEmail(login.getIdentifier());
-            if (patient == null || !passwordEncoder.matches(login.getPassword(), patient.getPassword())) {
+            boolean matches = patient != null && (
+                patient.getPassword().equals(login.getPassword()) ||
+                passwordEncoder.matches(login.getPassword(), patient.getPassword())
+            );
+
+            if (!matches) {
                 response.put("message", "Invalid email or password.");
                 return ResponseEntity.status(401).body(response);
             }
@@ -200,18 +207,21 @@ public class Service {
             }
 
             Long patientId = patient.getId();
-            if (condition == null || condition.isBlank()) {
-                if (name == null || name.isBlank()) {
+            String cleanCondition = (condition != null && !condition.isBlank() && !condition.equalsIgnoreCase("null") && !condition.equalsIgnoreCase("allAppointments") && !condition.equalsIgnoreCase("all")) ? condition : null;
+            String cleanName = (name != null && !name.isBlank() && !name.equalsIgnoreCase("null") && !name.equalsIgnoreCase("all")) ? name : null;
+
+            if (cleanCondition == null) {
+                if (cleanName == null) {
                     return patientService.getPatientAppointment(patientId, token);
                 }
-                return patientService.filterByDoctor(name, patientId);
+                return patientService.filterByDoctor(cleanName, patientId);
             }
 
-            if (name == null || name.isBlank()) {
-                return patientService.filterByCondition(condition, patientId);
+            if (cleanName == null) {
+                return patientService.filterByCondition(cleanCondition, patientId);
             }
 
-            return patientService.filterByDoctorAndCondition(condition, name, patientId);
+            return patientService.filterByDoctorAndCondition(cleanCondition, cleanName, patientId);
         } catch (Exception e) {
             response.put("message", "Error filtering patient appointments.");
             return ResponseEntity.internalServerError().body(response);

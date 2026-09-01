@@ -1,23 +1,23 @@
 // patientRows.js
 export function createPatientRow(patient, appointmentId, doctorId) {
   const tr = document.createElement("tr");
-  console.log("CreatePatientRow :: ", doctorId)
+
   tr.innerHTML = `
-      <td class="patient-id">${patient.id}</td>
-      <td>${patient.name}</td>
-      <td>${patient.phone}</td>
-      <td>${patient.email}</td>
-      <td><img src="../assets/images/addPrescriptionIcon/addPrescription.png" alt="addPrescriptionIcon" class="prescription-btn" data-id="${patient.id}"></img></td>
-    `;
+    <td>${patient.id || "N/A"}</td>
+    <td>${patient.name || "N/A"}</td>
+    <td>${patient.phone || "N/A"}</td>
+    <td>${patient.email || "N/A"}</td>
+    <td>
+      <img src="/assets/images/edit/edit.png" alt="Prescription" class="prescription-btn" style="cursor: pointer; width: 20px;" />
+    </td>
+  `;
 
-  // Attach event listeners
-  tr.querySelector(".patient-id").addEventListener("click", () => {
-    window.location.href = `/pages/patientRecord.html?id=${patient.id}&doctorId=${doctorId}`;
-  });
-
-  tr.querySelector(".prescription-btn").addEventListener("click", () => {
-    window.location.href = `/pages/addPrescription.html?appointmentId=${appointmentId}&patientName=${patient.name}`;
-  });
+  const btn = tr.querySelector(".prescription-btn");
+  if (btn) {
+    btn.addEventListener("click", () => {
+      window.location.href = `/pages/addPrescription.html?appointmentId=${appointmentId}&doctorId=${doctorId}&patientName=${encodeURIComponent(patient.name || '')}`;
+    });
+  }
 
   return tr;
-}
+}// patientRows.js

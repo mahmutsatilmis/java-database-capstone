@@ -44,15 +44,22 @@ public class AppointmentController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(validation);
         }
 
-        try {
-            LocalDate appointmentDate = LocalDate.parse(date);
-            String searchName = (patientName == null || patientName.equalsIgnoreCase("null") || patientName.isBlank()) ? null : patientName;
-            return ResponseEntity.ok(appointmentService.getAppointment(searchName, appointmentDate, token));
-        } catch (Exception e) {
-            Map<String, Object> error = new HashMap<>();
-            error.put("error", "Invalid date format.");
-            return ResponseEntity.badRequest().body(error);
+        LocalDate appointmentDate = null;
+        if (date != null && !date.isBlank() && !date.equalsIgnoreCase("null") && !date.equalsIgnoreCase("all")) {
+            try {
+                appointmentDate = LocalDate.parse(date);
+            } catch (Exception e) {
+                Map<String, Object> error = new HashMap<>();
+                error.put("error", "Invalid date format.");
+                return ResponseEntity.badRequest().body(error);
+            }
         }
+
+        String searchName = (patientName != null && !patientName.isBlank() && !patientName.equalsIgnoreCase("null") && !patientName.equalsIgnoreCase("all"))
+                ? patientName.trim()
+                : null;
+
+        return ResponseEntity.ok(appointmentService.getAppointment(searchName, appointmentDate, token));
     }
 
     @PostMapping("/{token}")

@@ -1,45 +1,59 @@
 import { getAllAppointments } from "./services/appointmentRecordService.js";
 import { createPatientRow } from "./components/patientRows.js";
 
-const tableBody = document.getElementById("patientTableBody");
-let selectedDate = new Date().toISOString().split("T")[0];
-const token = localStorage.getItem("token");
-let patientName = null;
+// Ensure token and role are synced if accessed via /doctorDashboard/{token}
+const pathParts = window.location.pathname.split("/").filter(Boolean);
+if (pathParts.length > 1 && pathParts[0] === "doctorDashboard") {
+  const urlToken = pathParts[1];
+  if (urlToken) {
+    localStorage.setItem("token", urlToken);
+    localStorage.setItem("userRole", "doctor");
+  }
+}
+
+let selectedDate = "null";
+let patientName = "null";
 
 function renderEmptyState(message) {
+  const tableBody = document.getElementById("patientTableBody");
   if (!tableBody) return;
-
-  tableBody.innerHTML = `
-    <tr>
-      <td colspan="5">${message}</td>
-    </tr>
-  `;
+  tableBody.innerHTML = `<tr><td colspan="5" style="text-align: center;">${message}</td></tr>`;
 }
 
 async function loadAppointments() {
+  const tableBody = document.getElementById("patientTableBody");
   if (!tableBody) return;
 
+  const currentToken = localStorage.getItem("token") || window.location.pathname.split("/").filter(Boolean).pop();
+  if (!currentToken) {
+    renderEmptyState("Session expired. Please log in again.");
+    return;
+  }
+
   try {
-    const response = await getAllAppointments(selectedDate, patientName || "null", token);
-    const appointments = response?.appointments || response?.data || response || [];
+    const dateParam = selectedDate || "null";
+    const nameParam = (patientName && patientName.trim().length > 0 && patientName !== "null") ? patientName.trim() : "null";
+
+    const response = await getAllAppointments(dateParam, nameParam, currentToken);
+    const appointments = response?.appointments || response?.data || (Array.isArray(response) ? response : []);
 
     tableBody.innerHTML = "";
 
     if (!appointments || appointments.length === 0) {
-      renderEmptyState("No Appointments found for today.");
+      renderEmptyState("No Appointments found.");
       return;
     }
 
     appointments.forEach((appointment) => {
-      const patient = appointment.patient || {
-        id: appointment.patientId || "N/A",
-        name: appointment.patientName || "Unknown patient",
-        phone: appointment.phone || "N/A",
-        email: appointment.email || "N/A",
+      const patient = {
+        id: appointment.patientId || appointment.patient?.id || "N/A",
+        name: appointment.patientName || appointment.patient?.name || "Unknown patient",
+        phone: appointment.patientPhone || appointment.phone || appointment.patient?.phone || "N/A",
+        email: appointment.patientEmail || appointment.email || appointment.patient?.email || "N/A",
       };
 
-      const doctorId = appointment.doctor?.id || appointment.doctorId || "";
-      const appointmentId = appointment.id || "";
+      const doctorId = appointment.doctorId || appointment.doctor?.id || "";
+      const appointmentId = appointment.id || appointment.appointmentId || "";
       const row = createPatientRow(patient, appointmentId, doctorId);
       tableBody.appendChild(row);
     });
@@ -56,8 +70,8 @@ window.addEventListener("DOMContentLoaded", () => {
 
   if (searchBar) {
     searchBar.addEventListener("input", () => {
-      const value = searchBar.value.trim();
-      patientName = value || "null";
+      const val = searchBar.value.trim();
+      patientName = val.length > 0 ? val : "null";
       loadAppointments();
     });
   }
@@ -74,9 +88,8 @@ window.addEventListener("DOMContentLoaded", () => {
   }
 
   if (datePicker) {
-    datePicker.value = selectedDate;
     datePicker.addEventListener("change", () => {
-      selectedDate = datePicker.value || new Date().toISOString().split("T")[0];
+      selectedDate = datePicker.value ? datePicker.value : "null";
       loadAppointments();
     });
   }

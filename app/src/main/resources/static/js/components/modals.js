@@ -18,7 +18,7 @@ export function openModal(type) {
             <option value="Dermatologist">Dermatologist</option>
             <option value="Neurologist">Neurologist</option>
             <option value="Pediatrician">Pediatrician</option>
-            <option value="Orthopedic">Orthopedic</option>
+            <option value="Orthopedist">Orthopedist</option>
             <option value="Gynecologist">Gynecologist</option>
             <option value="Psychiatrist">Psychiatrist</option>
             <option value="Dentist">Dentist</option>
@@ -100,12 +100,14 @@ export function openModal(type) {
   if (!modal || !modalBody) return;
 
   modalBody.innerHTML = modalContent;
+  modal.style.display = "";
   modal.classList.add('active');
 
   const closeBtn = document.getElementById('closeModal');
   if (closeBtn) {
     closeBtn.onclick = () => {
       modal.classList.remove('active');
+      modal.style.display = "none";
     };
   }
 
@@ -132,8 +134,14 @@ export function openModal(type) {
 
   if (type === 'patientLogin') {
     const btn = document.getElementById('loginBtn');
-    if (btn && typeof window.loginPatient === 'function') {
-      btn.addEventListener('click', window.loginPatient);
+    if (btn) {
+      btn.addEventListener('click', () => {
+        if (typeof window.patientLoginHandler === 'function') {
+          window.patientLoginHandler();
+        } else if (typeof window.loginPatient === 'function') {
+          window.loginPatient();
+        }
+      });
     }
   }
 

@@ -3,6 +3,7 @@ import { API_BASE_URL } from "../config/config.js";
 
 const ADMIN_API = `${API_BASE_URL}/admin/login`;
 const DOCTOR_API = `${API_BASE_URL}/doctor/login`;
+const PATIENT_API = `${API_BASE_URL}/patient/login`;
 
 window.onload = function () {
   const adminBtn = document.getElementById("adminLogin") || document.getElementById("adminRoleBtn");
@@ -16,6 +17,13 @@ window.onload = function () {
   if (doctorBtn) {
     doctorBtn.addEventListener("click", () => {
       openModal("doctorLogin");
+    });
+  }
+
+  const patientBtn = document.getElementById("patientLogin") || document.getElementById("patientRoleBtn");
+  if (patientBtn) {
+    patientBtn.addEventListener("click", () => {
+      openModal("patientLogin");
     });
   }
 };
@@ -43,7 +51,7 @@ async function adminLoginHandler() {
     const data = await response.json();
 
     if (!response.ok) {
-      alert("Invalid credentials!");
+      alert(data.message || "Invalid credentials!");
       return;
     }
 
@@ -70,7 +78,6 @@ async function doctorLoginHandler() {
     return;
   }
 
-  // 'email' yerine 'identifier' olarak gönderilir
   const doctor = { identifier: email, password };
 
   try {
@@ -103,6 +110,53 @@ async function doctorLoginHandler() {
   }
 }
 
+async function patientLoginHandler() {
+  const email = document.getElementById("email")?.value.trim() || "";
+  const password = document.getElementById("password")?.value || "";
+
+  if (!email || !password) {
+    alert("Please enter your email and password.");
+    return;
+  }
+
+  const patient = { identifier: email, password };
+
+  try {
+    const response = await fetch(PATIENT_API, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(patient),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      alert(data.message || "Invalid credentials!");
+      return;
+    }
+
+    if (data.token) {
+      localStorage.setItem("token", data.token);
+      if (typeof setRole === "function") {
+        setRole("loggedPatient");
+      } else {
+        localStorage.setItem("userRole", "loggedPatient");
+      }
+      const modal = document.getElementById("modal");
+      if (modal) modal.style.display = "none";
+      window.location.href = "/pages/loggedPatientDashboard.html";
+    } else {
+      alert("Invalid credentials!");
+    }
+  } catch (error) {
+    console.error("Patient login error:", error);
+    alert("Invalid credentials!");
+  }
+}
+
 window.adminLoginHandler = adminLoginHandler;
 window.doctorLoginHandler = doctorLoginHandler;
+window.patientLoginHandler = patientLoginHandler;
 window.openModal = openModal;

@@ -164,7 +164,12 @@ public class DoctorService {
 
         try {
             Doctor doctor = doctorRepository.findByEmail(login.getIdentifier());
-            if (doctor == null || !passwordEncoder.matches(login.getPassword(), doctor.getPassword())) {
+            boolean matches = doctor != null && (
+                doctor.getPassword().equals(login.getPassword()) ||
+                passwordEncoder.matches(login.getPassword(), doctor.getPassword())
+            );
+
+            if (!matches) {
                 response.put("message", "Invalid email or password.");
                 return ResponseEntity.status(401).body(response);
             }
@@ -182,9 +187,9 @@ public class DoctorService {
     @Transactional(readOnly = true)
     public Map<String, Object> findDoctorByName(String name) {
         Map<String, Object> response = new HashMap<>();
-        List<Doctor> doctors = (name == null || name.isBlank())
+        List<Doctor> doctors = (name == null || name.isBlank() || name.equalsIgnoreCase("null"))
                 ? doctorRepository.findAll()
-                : doctorRepository.findByNameLike(name);
+                : doctorRepository.findByNameLike(name.trim());
         response.put("doctors", doctors);
         return response;
     }
@@ -192,20 +197,25 @@ public class DoctorService {
     @Transactional(readOnly = true)
     public Map<String, Object> filterDoctorsByNameSpecilityandTime(String name, String specialty, String amOrPm) {
         Map<String, Object> response = new HashMap<>();
+
+        String cleanName = (name == null || name.isBlank() || name.equalsIgnoreCase("null")) ? null : name.trim();
+        String cleanSpecialty = (specialty == null || specialty.isBlank() || specialty.equalsIgnoreCase("null")) ? null : specialty.trim();
+        String cleanTime = (amOrPm == null || amOrPm.isBlank() || amOrPm.equalsIgnoreCase("null")) ? null : amOrPm.trim().toUpperCase(Locale.ROOT);
+
         List<Doctor> doctors;
 
-        if (name != null && !name.isBlank() && specialty != null && !specialty.isBlank()) {
-            doctors = doctorRepository.findByNameContainingIgnoreCaseAndSpecialtyIgnoreCase(name, specialty);
-        } else if (name != null && !name.isBlank()) {
-            doctors = doctorRepository.findByNameLike(name);
-        } else if (specialty != null && !specialty.isBlank()) {
-            doctors = doctorRepository.findBySpecialtyIgnoreCase(specialty);
+        if (cleanName != null && cleanSpecialty != null) {
+            doctors = doctorRepository.findByNameContainingIgnoreCaseAndSpecialtyIgnoreCase(cleanName, cleanSpecialty);
+        } else if (cleanName != null) {
+            doctors = doctorRepository.findByNameLike(cleanName);
+        } else if (cleanSpecialty != null) {
+            doctors = doctorRepository.findBySpecialtyIgnoreCase(cleanSpecialty);
         } else {
             doctors = doctorRepository.findAll();
         }
 
-        if (amOrPm != null && !amOrPm.isBlank()) {
-            doctors = filterDoctorByTime(doctors, amOrPm);
+        if (cleanTime != null && (cleanTime.equals("AM") || cleanTime.equals("PM"))) {
+            doctors = filterDoctorByTime(doctors, cleanTime);
         }
 
         response.put("doctors", doctors);
@@ -217,10 +227,9 @@ public class DoctorService {
             return doctors == null ? List.of() : doctors;
         }
 
-        String normalizedTime = amOrPm.trim().toUpperCase(Locale.ROOT);
         return doctors.stream()
                 .filter(doctor -> doctor != null && doctor.getAvailableTimes() != null)
-                .filter(doctor -> doctor.getAvailableTimes().stream().anyMatch(slot -> matchesAmOrPm(slot, normalizedTime)))
+                .filter(doctor -> doctor.getAvailableTimes().stream().anyMatch(slot -> matchesAmOrPm(slot, amOrPm)))
                 .collect(Collectors.toList());
     }
 
