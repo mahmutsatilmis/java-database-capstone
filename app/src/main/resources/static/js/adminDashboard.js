@@ -1,72 +1,130 @@
-/*
-  This script handles the admin dashboard functionality for managing doctors:
-  - Loads all doctor cards
-  - Filters doctors by name, time, or specialty
-  - Adds a new doctor via modal form
+import { openModal } from "./components/modals.js";
+import { getDoctors, filterDoctors, saveDoctor } from "./services/doctorServices.js";
+import { createDoctorCard } from "./components/doctorCard.js";
 
+function renderDoctorCards(doctors) {
+  const contentDiv = document.getElementById("content");
+  if (!contentDiv) return;
 
-  Attach a click listener to the "Add Doctor" button
-  When clicked, it opens a modal form using openModal('addDoctor')
+  contentDiv.innerHTML = "";
 
+  if (!doctors || doctors.length === 0) {
+    contentDiv.innerHTML = "<p>No doctors found with the given filters.</p>";
+    return;
+  }
 
-  When the DOM is fully loaded:
-    - Call loadDoctorCards() to fetch and display all doctors
+  doctors.forEach((doctor) => {
+    const card = createDoctorCard(doctor);
+    contentDiv.appendChild(card);
+  });
+}
 
+async function loadDoctorCards() {
+  try {
+    const doctors = await getDoctors();
+    renderDoctorCards(doctors);
+  } catch (error) {
+    console.error("Failed to load doctors:", error);
+    const contentDiv = document.getElementById("content");
+    if (contentDiv) {
+      contentDiv.innerHTML = "<p>Unable to load doctors right now.</p>";
+    }
+  }
+}
 
-  Function: loadDoctorCards
-  Purpose: Fetch all doctors and display them as cards
+function filterDoctorsOnChange() {
+  const searchBar = document.getElementById("searchBar");
+  const filterTime = document.getElementById("filterTime");
+  const filterSpecialty = document.getElementById("filterSpecialty");
 
-    Call getDoctors() from the service layer
-    Clear the current content area
-    For each doctor returned:
-    - Create a doctor card using createDoctorCard()
-    - Append it to the content div
+  if (!searchBar || !filterTime || !filterSpecialty) return;
 
-    Handle any fetch errors by logging them
+  const name = searchBar.value.trim() || null;
+  const time = filterTime.value || null;
+  const specialty = filterSpecialty.value || null;
 
+  filterDoctors(name, time, specialty)
+    .then((response) => {
+      const doctors = response?.doctors || [];
+      renderDoctorCards(doctors);
+    })
+    .catch((error) => {
+      console.error("Failed to filter doctors:", error);
+      alert("❌ An error occurred while filtering doctors.");
+    });
+}
 
-  Attach 'input' and 'change' event listeners to the search bar and filter dropdowns
-  On any input change, call filterDoctorsOnChange()
+async function adminAddDoctor() {
+  const name = document.getElementById("doctorName")?.value.trim();
+  const specialty = document.getElementById("specialization")?.value;
+  const email = document.getElementById("doctorEmail")?.value.trim();
+  const password = document.getElementById("doctorPassword")?.value;
+  const phone = document.getElementById("doctorPhone")?.value.trim();
+  const checkboxes = document.querySelectorAll('input[name="availability"]:checked');
+  const availability = Array.from(checkboxes).map((checkbox) => checkbox.value);
 
+  if (!name || !specialty || !email || !password || !phone) {
+    alert("Please complete all doctor fields.");
+    return;
+  }
 
-  Function: filterDoctorsOnChange
-  Purpose: Filter doctors based on name, available time, and specialty
+  const token = localStorage.getItem("token");
+  if (!token) {
+    alert("Please log in again to continue.");
+    window.location.href = "/";
+    return;
+  }
 
-    Read values from the search bar and filters
-    Normalize empty values to null
-    Call filterDoctors(name, time, specialty) from the service
+  const doctor = {
+    name,
+    specialty,
+    email,
+    password,
+    phone,
+    availability,
+  };
 
-    If doctors are found:
-    - Render them using createDoctorCard()
-    If no doctors match the filter:
-    - Show a message: "No doctors found with the given filters."
+  try {
+    const result = await saveDoctor(doctor, token);
+    if (result.success) {
+      alert(result.message || "Doctor added successfully.");
+      const modal = document.getElementById("modal");
+      if (modal) modal.style.display = "none";
+      await loadDoctorCards();
+    } else {
+      alert(result.message || "Unable to add doctor.");
+    }
+  } catch (error) {
+    console.error("Admin add doctor failed:", error);
+    alert("❌ Failed to add doctor.");
+  }
+}
 
-    Catch and display any errors with an alert
+window.adminAddDoctor = adminAddDoctor;
 
+window.addEventListener("DOMContentLoaded", () => {
+  const addDocBtn = document.getElementById("addDocBtn");
+  if (addDocBtn) {
+    addDocBtn.addEventListener("click", () => {
+      openModal("addDoctor");
+    });
+  }
 
-  Function: renderDoctorCards
-  Purpose: A helper function to render a list of doctors passed to it
+  const searchBar = document.getElementById("searchBar");
+  if (searchBar) {
+    searchBar.addEventListener("input", filterDoctorsOnChange);
+  }
 
-    Clear the content area
-    Loop through the doctors and append each card to the content area
+  const filterTime = document.getElementById("filterTime");
+  if (filterTime) {
+    filterTime.addEventListener("change", filterDoctorsOnChange);
+  }
 
+  const filterSpecialty = document.getElementById("filterSpecialty");
+  if (filterSpecialty) {
+    filterSpecialty.addEventListener("change", filterDoctorsOnChange);
+  }
 
-  Function: adminAddDoctor
-  Purpose: Collect form data and add a new doctor to the system
+  loadDoctorCards();
+});
 
-    Collect input values from the modal form
-    - Includes name, email, phone, password, specialty, and available times
-
-    Retrieve the authentication token from localStorage
-    - If no token is found, show an alert and stop execution
-
-    Build a doctor object with the form values
-
-    Call saveDoctor(doctor, token) from the service
-
-    If save is successful:
-    - Show a success message
-    - Close the modal and reload the page
-
-    If saving fails, show an error message
-*/
